@@ -25,23 +25,12 @@ def request_dh():
     print(k)
 
     return shared_secret
-    # return jsonify({'hoba':  k})
-
-# @app.route('/')
-# def decrypt():
-
-#     f = FR.FRNET_Wrapper(b'hoba')
-
-#     payload = f.decrypt(f.decode(hoba))
-
-#     # print(payload)
-#     return jsonify({'yalla' : payload.decode()})
 
 
 def request_rsa_key_securly():
-
+    
     d = DH_Wrapper()
-    res = requests.get(f'http://localhost:{CA_PORT}/rsa/request/{d.y}').json()
+    res = requests.get(f'http://localhost:{CA_PORT}/rsa/request/{d.y}/{d.modulus}').json()
     peer_y = int(res['peer_y'])
 
     shared_key = d.calc_shared_key(peer_y)

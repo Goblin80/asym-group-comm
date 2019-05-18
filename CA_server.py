@@ -13,7 +13,6 @@ from  lib.fernet import FRNET_Wrapper
 
 app = Flask(__name__)
 
-
 def generate_rsa_private(dh_key):
 
     f = FRNET_Wrapper(dh_key)
@@ -37,10 +36,13 @@ def generate_shared_secret(peer_y):
     return jsonify({'public': d.y})
 
 
-@app.route("/rsa/request/<int:peer_y>")
-def generate_rsa_private_encrypted(peer_y):
+@app.route("/rsa/request/<int:peer_y>/<int:modulus>")
+def generate_rsa_private_encrypted(peer_y, modulus):
 
-    d = DH_Wrapper()
+    print(peer_y)
+    print(modulus)
+
+    d = DH_Wrapper(modulus)
     shared_secret = d.calc_shared_key(peer_y)
 
     rsa_key_encrypted, signature = generate_rsa_private(shared_secret)
