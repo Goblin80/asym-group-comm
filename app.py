@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, render_template, request
 import requests
 import base64
 
@@ -11,12 +11,12 @@ from lib.message import Message
 
 from lib.serial import encode, decode
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder='UI')
 
 CA_HOST, CA_PORT = 'localhost', 5000
 
 
-currentUser = User('Alice', 5001)
+currentUser = User('', 0)
 mailbox = []
 usersMap = {}
 
@@ -33,17 +33,16 @@ def receive_msg(ciphertext):
 @app.route("/broadcast/<message>")
 def broadcast_msg(message):
     for id in usersMap:
-        currentUser.send(message, usersMap[id])
+        currentUser.send(currentUser.name + ": " + message, usersMap[id])
     return jsonify({'status': 'Message broadcasted'})
 
 @app.route("/request/<name>/<int:port>")
 def request_rsa_key_securly(name, port):
-    user = User(name, port) # remove later
     currentUser.name, currentUser.port = name, port
 
     d = DH_Wrapper()
     res = requests.get(
-        f'http://{CA_HOST}:{CA_PORT}/rsa/request/{d.y}/{d.modulus}/{user.name}/{user.port}').json()
+        f'http://{CA_HOST}:{CA_PORT}/rsa/request/{d.y}/{d.modulus}/{currentUser.name}/{currentUser.port}').json()
     peer_y = int(res['peer_y'])
 
     shared_key = d.calc_shared_key(peer_y)
@@ -64,29 +63,26 @@ def fetch_users():
     for r in res['users']:
         usersMap[r['name']] = User(r['name'], r['port'], r['public'].encode())
 
-    print(usersMap)
-    return jsonify({'status' : 'fetch successful'})
+    return jsonify({'status' : 'fetch users successful'})
 
 
 @app.route("/fetch/mailbox")
 def view_msg():
+    fetch_users() # just to be safe
+
     return jsonify({'messages' : mailbox})
 
 
+
 @app.route("/")
+def login():
+    return render_template('login.html')
+    # return jsonify({'status' : 'homepage'})
+
+
+@app.route("/home", methods=['POST'])
 def home():
-    return jsonify({'status' : 'homepage'})
-
-
-
-
-# currentUser.private = RSA.Private(open('key1.private', 'rb').read())
-
-# currentUser.public = RSA.Public(open('key1.public', 'rb').read())
-# msg = 'hello'
-
-# ciphertext = currentUser.encrypt(msg.encode(),currentUser)
-# print(ciphertext)
-
-# plaintext = currentUser.decrypt('Myrgw19PpQ5DTa64kVXG5xqkEhIFNdC4xO4zkXFFYivVWX_-mIcCrRPswy0Tm3e72C6PGTF4T-kD7o9UzgmGpwymtXkhLZ7vfoG754lEAXrhWtYWYsiCPoi4QGWzduofybeEfYfLFZGpobTDDoKUgxQyMno4PXD9r396u9iAwbU=')
-# print(plaintext)
+    name, port = request.form['name'], request.form['port']
+    request_rsa_key_securly(name, port)
+    return render_template('client.html', port=currentUser.port)
+    # return jsonify({'status' : 'homepage'})

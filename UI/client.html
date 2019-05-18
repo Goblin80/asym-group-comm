@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <title>Group Communication</title>
+</head>
+
+<body>
+
+
+    <div class="container">
+
+
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <a class="navbar-brand" href="#">Navbar</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+                aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item active">
+                        <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Link</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Dropdown
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <a class="dropdown-item" href="#">Action</a>
+                            <a class="dropdown-item" href="#">Another action</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="#">Something else here</a>
+                        </div>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Disabled</a>
+                    </li>
+                </ul>
+                <div class="form-inline my-2 my-lg-0">
+                    <input class="form-control mr-sm-2" type="search" placeholder="type here..." id="inputMsg"
+                        aria-label="Search">
+                    <button class="btn btn-outline-success my-2 my-sm-0" type="submit" id="btnSend">Send</button>
+                    <button class="btn btn-outline-success my-2 my-sm-0" type="submit" id="btnRefresh">Refresh</button>
+                </div>
+            </div>
+        </nav>
+
+
+        <ul class="list-group" id="log">
+
+        </ul>
+
+    </div>
+
+
+</body>
+
+
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+<script>
+
+    var url = `http://localhost:{{port}}`
+
+    var btnSend = document.querySelector("#btnSend")
+    btnSend.addEventListener("click", sendMessage)
+
+    var btnRefresh = document.querySelector("#btnRefresh")
+    btnRefresh.addEventListener("click", refreshAll)
+
+    refreshAll()
+
+    setInterval(refreshAll, 3000)
+
+    function sendMessage() {
+        var message = document.querySelector('#inputMsg').value
+
+        fetch(`${url}/broadcast/${message}`)
+        .then(r => refreshAll())
+
+
+    }
+
+
+    function refreshAll() {
+        var btnSend = document.querySelector("#btnSend")
+
+
+        fetch(`${url}/fetch/mailbox`)
+            .then(response => response.json())
+            .then(data => typeLog(data['messages']))
+
+    }
+
+
+    function typeLog(history) {
+        document.querySelector('#log').innerHTML = ''
+        for (var msg of history) {
+            var entry = document.createElement('li')
+            entry.className = 'list-group-item'
+            entry.innerHTML = msg
+
+            document.querySelector('#log').appendChild(entry)
+        }
+
+    }
+</script>
+
+</html>

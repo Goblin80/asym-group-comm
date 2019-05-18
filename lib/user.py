@@ -18,22 +18,15 @@ class User:
         self.mailbox = []  # list of messages
 
     def send(self, msg, user):
-
-        # encrypted = RSA.encode(self.encrypt(msg.encode(), user).encode())
         encrypted = self.encrypt(msg.encode(), user)
         res = requests.get(f'http://{user.host}:{user.port}/mailbox/{encrypted}')
         return res.status_code is 200
-        # return encrypted
 
     def encrypt(self, plaintext, user):  # should also sign message
         return RSA.encode(user.public.encrypt(plaintext))
 
     def decrypt(self, ciphertext):  # should also verify message
-
-        print(ciphertext)
-
         return self.private.decrypt(RSA.decode(ciphertext)).decode()
-        # return self.private.decrypt(RSA.decode(ciphertext.encode())).decode()
 
     def verify(self, msg, user):
         pass
