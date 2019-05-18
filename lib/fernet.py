@@ -4,7 +4,6 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 
 from lib.serial import encode, decode
-import base64
 
 
 class FRNET_Wrapper:
@@ -28,7 +27,7 @@ class FRNET_Wrapper:
         return self._fernet.decrypt(payload)
 
     def decode(self, payload):
-        return base64.urlsafe_b64decode(payload)
+        return decode(payload)
 
     def key_decrypt(self, key):
         return self.decrypt(self.decode(key))

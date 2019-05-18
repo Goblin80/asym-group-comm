@@ -8,45 +8,47 @@ import requests
 
 import lib.rsa as RSA
 from lib.dh import DH_Wrapper
-from  lib.fernet import FRNET_Wrapper
+from lib.fernet import FRNET_Wrapper
 
+from lib.user import User
 
 app = Flask(__name__)
 
-def generate_rsa_private(dh_key):
+
+def generate_rsa_pair(dh_key):
 
     f = FRNET_Wrapper(dh_key)
 
-
     rsa_private = RSA.Private()
 
-    CA_private = RSA.load_CA_private()
-    CA = RSA.Private(CA_private)
-    rsa_key_encrypted = f.encrypt(rsa_private.export())
+    CA = RSA.Private(RSA.load_CA_private())
 
-    return rsa_key_encrypted, CA.sign(rsa_private.export())
+    rsa_public = RSA.Public(rsa_private.deduce_public())
 
+    rsa_private_encrypted = f.encrypt(rsa_private.export())
 
-@app.route("/dh/agree/<int:peer_y>")
-def generate_shared_secret(peer_y):
-    d = DH_Wrapper()
-    shared_secret = d.calc_shared_key(peer_y)
-    # print(DH.encode(shared_secret))
-
-    return jsonify({'public': d.y})
+    # should sign public
+    return rsa_private_encrypted, rsa_public, CA.sign(rsa_private.export()),
 
 
-@app.route("/rsa/request/<int:peer_y>/<int:modulus>")
-def generate_rsa_private_encrypted(peer_y, modulus):
+userList = []
 
-    print(peer_y)
-    print(modulus)
+
+@app.route("/rsa/request/<int:peer_y>/<int:modulus>/<name>/<int:port>")
+def generate_rsa_private_encrypted(peer_y, modulus, name, port):
 
     d = DH_Wrapper(modulus)
     shared_secret = d.calc_shared_key(peer_y)
 
-    rsa_key_encrypted, signature = generate_rsa_private(shared_secret)
+    rsa_key_encrypted, rsa_public, signature = generate_rsa_pair(shared_secret)
 
-    # print(signature)
+    userList.append({'name': name,
+                     'port': port,
+                     'public': rsa_public.export().decode()})
 
     return jsonify({'peer_y': d.y, 'rsa': RSA.encode(rsa_key_encrypted), 'signature': RSA.encode(signature)})
+
+
+@app.route("/registry")
+def view_registry():
+    return jsonify({'users': userList})

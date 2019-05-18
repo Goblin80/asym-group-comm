@@ -30,12 +30,13 @@ class Public():
             return False
         return True
 
-
     def load(self, pem):
         return serialization.load_pem_public_key(pem, default_backend())
 
     def export(self):
-        pass
+        return self.key.public_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PublicFormat.SubjectPublicKeyInfo)
 
 
 class Private():
@@ -53,6 +54,11 @@ class Private():
             key_size=size,
             backend=default_backend()
         )
+
+    def deduce_public(self):
+        return self.key.public_key().public_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PublicFormat.SubjectPublicKeyInfo)
 
     def decrypt(self, payload):
         return self.key.decrypt(payload,
