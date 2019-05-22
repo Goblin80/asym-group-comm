@@ -40,10 +40,20 @@ def generate_rsa_private_encrypted(peer_y, modulus, name, port):
     rsa_key_encrypted, rsa_public, signature = generate_rsa_pair(shared_secret)
 
     userList.append({'name': name,
+                     'host': 'localhost',  # hardcoded for now
                      'port': port,
-                     'public': rsa_public.export().decode()})
+                     'public': rsa_public.export().decode(),
+                     'signature': RSA.encode(signature)})
 
+    notify_users()
     return jsonify({'peer_y': d.y, 'rsa': RSA.encode(rsa_key_encrypted), 'signature': RSA.encode(signature)})
+
+
+def notify_users():
+    for user in userList:
+        requests.post(
+            f"http://{user['host']}:{user['port']}/update/users", json={'users': userList})
+    return
 
 
 @app.route("/registry")
