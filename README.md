@@ -2,7 +2,7 @@
 
 Multi-client encrypted communication service.
 
-## How it works ?
+## Description
 
 1. Clients asks certificate authority (CA_server.py) to generate `RSA` keys for them.
 
@@ -16,7 +16,7 @@ Multi-client encrypted communication service.
 
 1. Public keys generated are kept in a registry maintained by CA for transparency.
 
-1. Clients communicate directly with each other directly.
+1. Clients communicate directly with each other.
 
 
 ## Usage

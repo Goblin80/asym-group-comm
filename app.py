@@ -1,17 +1,15 @@
 from flask import Flask, jsonify, render_template, request
 import requests
-import base64
 
 import lib.rsa as RSA
 import lib.ecc as ECC
 from lib.dh import DH_Wrapper
 from lib.fernet import FRNET_Wrapper
-
 from lib.user import User
-
 from lib.serial import encode, decode
 
-app = Flask(__name__, template_folder='UI')
+app = Flask(__name__, template_folder='UI',
+            static_url_path='/static', static_folder='UI/static')
 
 CA_HOST, CA_PORT = 'localhost', 5000
 
@@ -52,12 +50,8 @@ def request_rsa_key_securly(name, port):
     shared_key = d.calc_shared_key(peer_y)
 
     f = FRNET_Wrapper(shared_key)
-    rsa_key_encrypted = res['rsa']
-
-    signature = res['signature']
-
+    rsa_key_encrypted, signature = res['rsa'], res['signature']
     CA = ECC.Public(ECC.load_CA_public())
-
     rsa_key = f.key_decrypt(rsa_key_encrypted)
 
     if CA.verify(decode(signature), rsa_key) is True:
@@ -83,7 +77,6 @@ def update_users():
 def view_msg():
 
     if(request.remote_addr == '127.0.0.1'):
-        # fetch_users()  # just to be safe
         return jsonify({'messages': mailbox})
     else:
         print(f"--- unauthorized access attempt --- {request.remote_addr}")

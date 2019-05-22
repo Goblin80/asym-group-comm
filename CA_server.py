@@ -10,7 +10,6 @@ import lib.rsa as RSA
 import lib.ecc as ECC
 from lib.dh import DH_Wrapper
 from lib.fernet import FRNET_Wrapper
-
 from lib.user import User
 
 app = Flask(__name__)
