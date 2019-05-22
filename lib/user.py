@@ -18,7 +18,8 @@ class User:
 
     def send(self, msg, user):
         encrypted = self.encrypt(msg.encode(), user)
-        res = requests.get(f'http://{user.host}:{user.port}/mailbox/{encrypted}')
+        res = requests.get(
+            f'http://{user.host}:{user.port}/mailbox/{encrypted}')
         return res.status_code is 200
 
     def encrypt(self, plaintext, user):  # should also sign message

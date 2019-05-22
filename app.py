@@ -32,8 +32,12 @@ def receive_msg(ciphertext):
 @app.route("/broadcast/<message>")
 def broadcast_msg(message):
     for id in usersMap:
-        currentUser.send(currentUser.name + ": " + message, usersMap[id])
+        try:
+            currentUser.send(currentUser.name + ": " + message, usersMap[id])
+        except:
+            print(f"Could not send to user {usersMap[id].name}")
     return jsonify({'status': 'Message broadcasted'})
+
 
 @app.route("/request/<name>/<int:port>")
 def request_rsa_key_securly(name, port):
@@ -54,7 +58,8 @@ def request_rsa_key_securly(name, port):
     currentUser.private = RSA.Private(rsa_key)
     currentUser.public = RSA.Public(currentUser.private.deduce_public())
 
-    return jsonify({'status' : 'keys generated'})
+    return jsonify({'status': 'keys generated'})
+
 
 @app.route("/fetch/users")
 def fetch_users():
@@ -62,26 +67,27 @@ def fetch_users():
     for r in res['users']:
         usersMap[r['name']] = User(r['name'], r['port'], r['public'].encode())
 
-    return jsonify({'status' : 'fetch users successful'})
+    return jsonify({'status': 'fetch users successful'})
 
 
 @app.route("/fetch/mailbox")
 def view_msg():
-    fetch_users() # just to be safe
 
-    return jsonify({'messages' : mailbox})
-
+    if(request.remote_addr == '127.0.0.1'):
+        fetch_users()  # just to be safe
+        return jsonify({'messages': mailbox})
+    else:
+        print(f"--- unauthorized access attempt --- {request.remote_addr}")
+        return jsonify({'error': 'UNAUTHORIZED ACCESS'})
 
 
 @app.route("/")
 def login():
     return render_template('login.html')
-    # return jsonify({'status' : 'homepage'})
 
 
 @app.route("/home", methods=['POST'])
 def home():
     name, port = request.form['name'], request.form['port']
     request_rsa_key_securly(name, port)
-    return render_template('client.html', port=currentUser.port)
-    # return jsonify({'status' : 'homepage'})
+    return render_template('client.html', name=currentUser.name, port=currentUser.port)
