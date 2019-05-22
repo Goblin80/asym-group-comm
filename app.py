@@ -71,20 +71,19 @@ def request_rsa_key_securly(name, port):
     return jsonify({'status': 'keys generated'})
 
 
-@app.route("/fetch/users")
-def fetch_users():
-    res = requests.get(f'http://{CA_HOST}:{CA_PORT}/registry').json()
-    for r in res['users']:
+@app.route("/update/users", methods=['POST'])
+def update_users():
+    for r in request.get_json()['users']:
         usersMap[r['name']] = User(r['name'], r['port'], r['public'].encode())
 
-    return jsonify({'status': 'fetch users successful'})
+    return jsonify({'status': 'users have been updated successful'})
 
 
 @app.route("/fetch/mailbox")
 def view_msg():
 
     if(request.remote_addr == '127.0.0.1'):
-        fetch_users()  # just to be safe
+        # fetch_users()  # just to be safe
         return jsonify({'messages': mailbox})
     else:
         print(f"--- unauthorized access attempt --- {request.remote_addr}")

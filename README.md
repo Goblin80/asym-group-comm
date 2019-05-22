@@ -16,7 +16,7 @@ Multi-client encrypted communication service.
 
 1. Public keys generated are kept in a registry maintained by CA for transparency.
 
-1. Clients communicate directly with each other directly; only polling CA every once and a while for new clients.
+1. Clients communicate directly with each other directly.
 
 
 ## Usage
