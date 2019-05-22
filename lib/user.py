@@ -1,7 +1,6 @@
 import requests
 
 import lib.rsa as RSA
-from lib.message import Message
 
 
 class User:

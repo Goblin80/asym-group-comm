@@ -7,7 +7,6 @@ from lib.dh import DH_Wrapper
 from lib.fernet import FRNET_Wrapper
 
 from lib.user import User
-from lib.message import Message
 
 from lib.serial import encode, decode
 
