@@ -7,6 +7,7 @@ from flask import Flask, jsonify
 import requests
 
 import lib.rsa as RSA
+import lib.ecc as ECC
 from lib.dh import DH_Wrapper
 from lib.fernet import FRNET_Wrapper
 
@@ -18,13 +19,9 @@ app = Flask(__name__)
 def generate_rsa_pair(dh_key):
 
     f = FRNET_Wrapper(dh_key)
-
     rsa_private = RSA.Private()
-
-    CA = RSA.Private(RSA.load_CA_private())
-
+    CA = ECC.Private(ECC.load_CA_private())
     rsa_public = RSA.Public(rsa_private.deduce_public())
-
     rsa_private_encrypted = f.encrypt(rsa_private.export())
 
     # should sign public

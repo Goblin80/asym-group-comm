@@ -3,6 +3,7 @@ import requests
 import base64
 
 import lib.rsa as RSA
+import lib.ecc as ECC
 from lib.dh import DH_Wrapper
 from lib.fernet import FRNET_Wrapper
 
@@ -53,7 +54,16 @@ def request_rsa_key_securly(name, port):
     f = FRNET_Wrapper(shared_key)
     rsa_key_encrypted = res['rsa']
 
+    signature = res['signature']
+
+    CA = ECC.Public(ECC.load_CA_public())
+
     rsa_key = f.key_decrypt(rsa_key_encrypted)
+
+    if CA.verify(decode(signature), rsa_key) is True:
+        print("Key has been verfied")
+    else:
+        print("Key smells fishy")
 
     currentUser.private = RSA.Private(rsa_key)
     currentUser.public = RSA.Public(currentUser.private.deduce_public())
