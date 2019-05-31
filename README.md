@@ -19,6 +19,10 @@ Multi-client encrypted communication service.
 1. Clients communicate directly with each other.
 
 
+## Install dependencies
+
+``$ pip install -r requirements.txt``
+
 ## Usage
 * CA : `FLASK_APP=CA_server.py flask run -p 5000`
 * Client: `FLASK_APP=app.py flask run -p 5001`
